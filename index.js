@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = 5000;
-const SECRECT_KEY = "09052005";
+const SECRET_KEY = "09052005";
 
 // Middleware
 app.use(cors());
@@ -24,7 +24,7 @@ async function connectToDB() {
     const db = client.db(dbName);
     usersCollection = db.collection("users");
 
-    await usersCollection.CreateIndex({ username: 1 }, { unique: true });
+    await usersCollection.createIndex({ username: 1 }, { unique: true });
 
     console.log("Connected to MongoDB!");
   } catch (err) {
@@ -71,7 +71,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).send({ message: "Invalid username or password" });
     }
 
-    const token = jwt.sign({ username }, SECRECT_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: "1h" });
     res.send({ message: "Login successful", token });
   } catch (err) {
     res.status(500).send({ message: "Server error!", error: err.message });
