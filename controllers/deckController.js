@@ -43,3 +43,19 @@ async function updateDeck(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
+// Delete deck
+async function deleteDeck(req, res) {
+  const { deckID } = req.params;
+
+  try {
+    const deck = await Deck.findByIdAndDelete(deckID);
+    if (!deck) return res.status(404).json({ message: "Deck not found" });
+    res.json({ message: "Deleted succesfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+module.exports = { createDeck, getDeck, updateDeck, deleteDeck };

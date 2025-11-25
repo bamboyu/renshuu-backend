@@ -1,4 +1,4 @@
-const { getDB } = require("../config/db");
+const mongoose = require("mongoose");
 
 const DeckSchema = new mongoose.Schema({
   userID: {
@@ -6,17 +6,13 @@ const DeckSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+
   name: {
     type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
     required: true,
   },
 });
 
 // Auto timestamps
-UserSchema.set("timestamps", true);
-
-module.exports = mongoose.model("User", UserSchema);
+DeckSchema.set("timestamps", true);
+module.exports = mongoose.model("Deck", DeckSchema);
