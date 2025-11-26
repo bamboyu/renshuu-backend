@@ -42,7 +42,7 @@ async function login(req, res) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid login" });
 
-    const accessToken = jwt.sign({ email }, SECRET_KEY, { expiresIn: "1h" });
+    const accessToken = jwt.sign({ email }, SECRET_KEY, { expiresIn: "19y" });
     const refreshToken = jwt.sign({ email }, SECRET_KEY, { expiresIn: "10y" });
 
     user.refreshToken = refreshToken;

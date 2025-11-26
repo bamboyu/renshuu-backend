@@ -6,10 +6,11 @@ const {
   updateDeck,
   deleteDeck,
 } = require("../controllers/deckController");
+const authMiddleware = require("../middleware/authMiddleware");
 
-router.post("/", createDeck);
-router.get("/:userID", getDeck);
-router.put("/:deckID", updateDeck);
-router.delete("/:deckID", deleteDeck);
+router.post("/", authMiddleware, createDeck);
+router.get("/:userID", authMiddleware, getDeck);
+router.put("/:deckID", authMiddleware, updateDeck);
+router.delete("/:deckID", authMiddleware, deleteDeck);
 
 module.exports = router;
