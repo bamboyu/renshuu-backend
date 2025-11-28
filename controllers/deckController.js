@@ -17,7 +17,7 @@ async function createDeck(req, res) {
 }
 
 // Get all decks for a user
-async function getDeck(req, res) {
+async function getDecks(req, res) {
   const { userID } = req.params;
 
   try {
@@ -58,4 +58,4 @@ async function deleteDeck(req, res) {
   }
 }
 
-module.exports = { createDeck, getDeck, updateDeck, deleteDeck };
+module.exports = { createDeck, getDecks, updateDeck, deleteDeck };

@@ -26,7 +26,7 @@ async function createCard(req, res) {
 }
 
 // Get all cards in a deck
-async function getCardsInDeck(req, res) {
+async function getCards(req, res) {
   const { deckID } = req.params;
   try {
     const cards = await Card.find({ deckID });
@@ -68,4 +68,4 @@ async function deleteCard(req, res) {
   }
 }
 
-module.exports = { createCard, getCardsInDeck, updateCard, deleteCard };
+module.exports = { createCard, getCards, updateCard, deleteCard };

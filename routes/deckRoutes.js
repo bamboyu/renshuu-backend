@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 const {
   createDeck,
-  getDeck,
+  getDecks,
   updateDeck,
   deleteDeck,
 } = require("../controllers/deckController");
-const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/", authMiddleware, createDeck);
-router.get("/:userID", authMiddleware, getDeck);
+router.get("/:userID", authMiddleware, getDecks);
 router.put("/:deckID", authMiddleware, updateDeck);
 router.delete("/:deckID", authMiddleware, deleteDeck);
 
