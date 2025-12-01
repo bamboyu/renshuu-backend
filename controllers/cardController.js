@@ -2,10 +2,11 @@ const Card = require("../models/Card");
 
 // Create a new card
 async function createCard(req, res) {
-  const { deckID, front, back, image, sound, tag, interval } = req.body;
+  const { deckID, front, back, image, sound } = req.body;
 
-  if (!deckID || !front || !back)
+  if (!deckID || !front || !back) {
     return res.status(400).json({ message: "Missing required fields" });
+  }
 
   try {
     const card = await Card.create({
@@ -14,14 +15,17 @@ async function createCard(req, res) {
       back,
       image,
       sound,
-      tag,
-      interval,
+      repetition: 0,
+      easeFactor: 2.5,
+      interval: 0,
+      nextReview: new Date(),
+      tag: "New",
     });
 
     res.status(201).json(card);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Create Card Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 }
 
@@ -32,25 +36,28 @@ async function getCards(req, res) {
     const cards = await Card.find({ deckID });
     res.json(cards);
   } catch (err) {
-    console.error(err);
+    console.error("Get Cards Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 }
 
-// Update card
+// Update card (front/back edits)
 async function updateCard(req, res) {
   const { cardID } = req.params;
-  const { front, back, image, sound, tag, interval } = req.body;
+  const { front, back, image, sound } = req.body;
+
   try {
     const card = await Card.findByIdAndUpdate(
       cardID,
-      { front, back, image, sound, tag, interval },
+      { front, back, image, sound },
       { new: true }
     );
+
     if (!card) return res.status(404).json({ message: "Card not found" });
+
     res.json(card);
   } catch (err) {
-    console.error(err);
+    console.error("Update Card Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -58,12 +65,14 @@ async function updateCard(req, res) {
 // Delete card
 async function deleteCard(req, res) {
   const { cardID } = req.params;
+
   try {
     const card = await Card.findByIdAndDelete(cardID);
     if (!card) return res.status(404).json({ message: "Card not found" });
+
     res.json({ message: "Deleted successfully" });
   } catch (err) {
-    console.error(err);
+    console.error("Delete Card Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 }
@@ -76,9 +85,15 @@ async function getCardCount(req, res) {
     const count = await Card.countDocuments({ deckID });
     res.json({ deckID, count });
   } catch (err) {
-    console.error(err);
+    console.error("Get Card Count Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 }
 
-module.exports = { createCard, getCards, updateCard, deleteCard, getCardCount };
+module.exports = {
+  createCard,
+  getCards,
+  updateCard,
+  deleteCard,
+  getCardCount,
+};

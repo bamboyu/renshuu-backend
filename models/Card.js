@@ -10,14 +10,17 @@ const CardSchema = new mongoose.Schema({
   back: { type: String, required: true },
   image: { type: String },
   sound: { type: String },
+
+  // SM-2 fields
+  repetition: { type: Number, default: 0 },
+  easeFactor: { type: Number, default: 2.5 },
+  interval: { type: Number, default: 0 },
+  nextReview: { type: Date, default: Date.now },
+
   tag: {
     type: String,
     enum: ["New", "Learning", "Relearning", "Young", "Mature"],
     default: "New",
-  },
-  interval: {
-    type: Number,
-    default: 0, // number of days until next review
   },
 });
 
