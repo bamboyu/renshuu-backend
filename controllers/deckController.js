@@ -32,7 +32,7 @@ async function getDecks(req, res) {
 // Update deck
 async function updateDeck(req, res) {
   const { deckID } = req.params;
-  const { name } = req.req;
+  const { name } = req.body;
 
   try {
     const deck = await Deck.findByIdAndUpdate(deckID, { name }, { new: true });
