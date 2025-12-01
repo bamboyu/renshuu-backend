@@ -6,11 +6,13 @@ const {
   getCards,
   updateCard,
   deleteCard,
+  getCardCount,
 } = require("../controllers/cardController");
 
 router.post("/", authMiddleware, createCard);
 router.get("/:deckID", authMiddleware, getCards);
 router.put("/:cardID", authMiddleware, updateCard);
 router.delete("/:cardID", authMiddleware, deleteCard);
+router.get("/count/:deckID", getCardCount);
 
 module.exports = router;

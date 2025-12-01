@@ -68,4 +68,17 @@ async function deleteCard(req, res) {
   }
 }
 
-module.exports = { createCard, getCards, updateCard, deleteCard };
+// Count cards in a deck
+async function getCardCount(req, res) {
+  const { deckID } = req.params;
+
+  try {
+    const count = await Card.countDocuments({ deckID });
+    res.json({ deckID, count });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+module.exports = { createCard, getCards, updateCard, deleteCard, getCardCount };
