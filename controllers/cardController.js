@@ -2,11 +2,14 @@ const Card = require("../models/Card");
 
 // Create a new card
 async function createCard(req, res) {
-  const { deckID, front, back, image, sound } = req.body;
+  const { deckID, front, back } = req.body;
 
-  if (!deckID || !front || !back) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+  const image = req.files?.image
+    ? `/uploads/${req.files.image[0].filename}`
+    : null;
+  const sound = req.files?.sound
+    ? `/uploads/${req.files.sound[0].filename}`
+    : null;
 
   try {
     const card = await Card.create({
@@ -15,11 +18,11 @@ async function createCard(req, res) {
       back,
       image,
       sound,
+      tag: "New",
       repetition: 0,
       easeFactor: 2.5,
       interval: 0,
       nextReview: new Date(),
-      tag: "New",
     });
 
     res.status(201).json(card);
