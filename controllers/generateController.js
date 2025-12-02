@@ -1,10 +1,9 @@
 const { OpenAI } = require("openai");
-const axios = require("axios");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { v4: uuidv4 } = require("uuid");
 const s3 = require("../config/aws");
 
-// openAI configuration
+// OpenAI configuration
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -26,31 +25,36 @@ async function generateBack(req, res) {
     const backText = completion.choices[0].message.content.trim();
     res.json({ back: backText });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to generate back" });
+    console.error("Generate Back Error:", err);
+    res.status(500).json({ message: "Failed to generate back text" });
   }
 }
 
 // Generate Image and upload to S3
 async function generateImage(req, res) {
-  const { front } = req.body;
+  // Extract cardID if it exists (for updating existing cards)
+  const { front, cardID } = req.body;
 
   try {
-    // Generate image
+    // 1. Generate image with Base64 response
     const imageResponse = await openai.images.generate({
-      model: "gpt-image-1",
+      model: "dall-e-3", // Use a valid model (dall-e-2 or dall-e-3)
       prompt: `Create a simple illustrative image for: "${front}"`,
       size: "1024x1024",
+      response_format: "b64_json", // REQUIRED: Get image data, not just a URL
     });
 
-    // Get Base64 string
+    // 2. Get Base64 string
     const b64_json = imageResponse.data[0].b64_json;
-    if (!b64_json) throw new Error("No image data returned");
+    if (!b64_json) throw new Error("No image data returned from OpenAI");
 
+    // 3. Convert to Buffer
     const buffer = Buffer.from(b64_json, "base64");
 
-    // Upload to S3
+    // 4. Create unique key
     const key = `${uuidv4()}.png`;
+
+    // 5. Upload to S3
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME,
@@ -60,11 +64,27 @@ async function generateImage(req, res) {
       })
     );
 
+    // 6. Construct public URL
     const s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+    // 7. [FIX] Save to Database if cardID is provided
+    if (cardID) {
+      const updatedCard = await Card.findByIdAndUpdate(
+        cardID,
+        { image: s3Url },
+        { new: true }
+      );
+      if (!updatedCard) {
+        console.warn(
+          `Card with ID ${cardID} not found, image not saved to DB.`
+        );
+      }
+    }
+
     res.json({ image: s3Url });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to generate/upload image" });
+    console.error("Generate Image Error:", err);
+    res.status(500).json({ message: "Failed to generate or upload image" });
   }
 }
 

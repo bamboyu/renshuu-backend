@@ -7,12 +7,26 @@ async function createCard(req, res) {
   const { deckID, front, back, tag } = req.body;
 
   try {
+    // LOGIC FIX:
+    // 1. Check if a file was uploaded via Multer (req.files.image)
+    // 2. If not, check if a URL string was sent in the body (req.body.image)
+    // 3. Otherwise, set to null
+    const image =
+      req.files && req.files.image
+        ? req.files.image[0].location
+        : req.body.image || null;
+
+    const sound =
+      req.files && req.files.sound
+        ? req.files.sound[0].location
+        : req.body.sound || null;
+
     const card = await Card.create({
       deckID,
       front,
       back,
-      image: req.files?.image ? req.files.image[0].location : null,
-      sound: req.files?.sound ? req.files.sound[0].location : null,
+      image, // Saves either the S3 URL from upload OR the AI URL
+      sound,
       tag: tag || "New",
       repetition: 0,
       easeFactor: 2.5,
