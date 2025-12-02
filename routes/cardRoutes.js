@@ -9,6 +9,7 @@ const {
   updateCard,
   deleteCard,
   getCardCount,
+  getCardByID,
 } = require("../controllers/cardController");
 
 // Create card
@@ -21,6 +22,9 @@ router.post(
 
 // Get all cards in a deck
 router.get("/:deckID", authMiddleware, getCards);
+
+// Get card by ID
+router.get("/single/:cardID", authMiddleware, getCardByID);
 
 // Update card
 router.put(

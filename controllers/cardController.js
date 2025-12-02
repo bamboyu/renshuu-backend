@@ -2,23 +2,16 @@ const Card = require("../models/Card");
 
 // Create a new card
 async function createCard(req, res) {
-  const { deckID, front, back } = req.body;
-
-  const image = req.files?.image
-    ? `/uploads/${req.files.image[0].filename}`
-    : null;
-  const sound = req.files?.sound
-    ? `/uploads/${req.files.sound[0].filename}`
-    : null;
+  const { deckID, front, back, tag } = req.body;
 
   try {
     const card = await Card.create({
       deckID,
       front,
       back,
-      image,
-      sound,
-      tag: "New",
+      image: req.files?.image ? req.files.image[0].location : null, // S3 URL
+      sound: req.files?.sound ? req.files.sound[0].location : null, // S3 URL
+      tag: tag || "New",
       repetition: 0,
       easeFactor: 2.5,
       interval: 0,
@@ -44,19 +37,39 @@ async function getCards(req, res) {
   }
 }
 
+// Get a single card by ID
+async function getCardByID(req, res) {
+  const { cardID } = req.params;
+
+  try {
+    const card = await Card.findById(cardID);
+    if (!card) return res.status(404).json({ message: "Card not found" });
+    res.json(card);
+  } catch (err) {
+    console.error("Get Card Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 // Update card (front/back edits)
 async function updateCard(req, res) {
   const { cardID } = req.params;
-  const { front, back, image, sound } = req.body;
+  const { front, back, tag } = req.body;
 
   try {
-    const card = await Card.findByIdAndUpdate(
-      cardID,
-      { front, back, image, sound },
-      { new: true }
-    );
-
+    const card = await Card.findById(cardID);
     if (!card) return res.status(404).json({ message: "Card not found" });
+
+    // Update fields
+    if (front !== undefined) card.front = front;
+    if (back !== undefined) card.back = back;
+    if (tag !== undefined) card.tag = tag;
+
+    // Update files if new ones are uploaded
+    if (req.files?.image) card.image = req.files.image[0].location;
+    if (req.files?.sound) card.sound = req.files.sound[0].location;
+
+    await card.save();
 
     res.json(card);
   } catch (err) {
@@ -99,4 +112,5 @@ module.exports = {
   updateCard,
   deleteCard,
   getCardCount,
+  getCardByID,
 };

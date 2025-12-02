@@ -1,14 +1,13 @@
 const mongoose = require("mongoose");
 
-const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/renshuuDB";
-
-async function connectDB() {
+const connectDB = async () => {
   try {
-    await mongoose.connect(uri);
-    console.log("Mongoose connected!");
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected");
   } catch (err) {
-    console.error("Mongoose connection error:", err);
+    console.error(err);
+    process.exit(1);
   }
-}
+};
 
 module.exports = connectDB;
