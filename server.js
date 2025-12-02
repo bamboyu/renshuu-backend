@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authRoutes");
 const deckRoutes = require("./routes/deckRoutes");
 const cardRoutes = require("./routes/cardRoutes");
 const studyRoutes = require("./routes/studyRoutes");
+const generateRoutes = require("./routes/generateRoutes");
 
 // Initialize app
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/deck", deckRoutes);
 app.use("/api/card", cardRoutes);
 app.use("/api/study", studyRoutes);
+app.use("/api/generate", generateRoutes);
 
 // Start server after DB connection
 connectDB()

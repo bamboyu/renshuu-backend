@@ -1,4 +1,6 @@
 const Card = require("../models/Card");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/aws");
 
 // Create a new card
 async function createCard(req, res) {
@@ -9,8 +11,8 @@ async function createCard(req, res) {
       deckID,
       front,
       back,
-      image: req.files?.image ? req.files.image[0].location : null, // S3 URL
-      sound: req.files?.sound ? req.files.sound[0].location : null, // S3 URL
+      image: req.files?.image ? req.files.image[0].location : null,
+      sound: req.files?.sound ? req.files.sound[0].location : null,
       tag: tag || "New",
       repetition: 0,
       easeFactor: 2.5,
@@ -78,18 +80,58 @@ async function updateCard(req, res) {
   }
 }
 
-// Delete card
+// Delete a card
 async function deleteCard(req, res) {
   const { cardID } = req.params;
 
   try {
-    const card = await Card.findByIdAndDelete(cardID);
-    if (!card) return res.status(404).json({ message: "Card not found" });
+    const card = await Card.findById(cardID);
+    if (!card) {
+      return res.status(404).json({ message: "Card not found" });
+    }
 
-    res.json({ message: "Deleted successfully" });
+    // Helper function to extract key from URL and delete from S3
+    const deleteFromS3 = async (fileUrl) => {
+      if (!fileUrl) return;
+
+      try {
+        // Split the URL to get the filename
+        const rawFilename = fileUrl.split("/").pop();
+
+        // DECODE the filename
+        const fileKey = decodeURIComponent(rawFilename);
+
+        console.log(`Attempting to delete Key: ${fileKey}`); // Debug log
+
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: fileKey,
+          })
+        );
+        console.log(`Deleted S3 object: ${fileKey}`);
+      } catch (s3Err) {
+        console.error(`Failed to delete S3 object`, s3Err);
+      }
+    };
+
+    // Delete image from S3 if it exists
+    if (card.image) {
+      await deleteFromS3(card.image);
+    }
+
+    // Delete sound from S3 if it exists
+    if (card.sound) {
+      await deleteFromS3(card.sound);
+    }
+
+    // Delete the card from DB
+    await Card.findByIdAndDelete(cardID);
+
+    res.json({ message: "Card and associated files deleted successfully" });
   } catch (err) {
-    console.error("Delete Card Error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to delete card" });
   }
 }
 

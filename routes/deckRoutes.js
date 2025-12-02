@@ -9,7 +9,7 @@ const {
 } = require("../controllers/deckController");
 
 router.post("/", authMiddleware, createDeck);
-router.get("/:userID", authMiddleware, getDecks);
+router.get("/", authMiddleware, getDecks);
 router.put("/:deckID", authMiddleware, updateDeck);
 router.delete("/:deckID", authMiddleware, deleteDeck);
 
