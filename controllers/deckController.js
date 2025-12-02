@@ -70,12 +70,16 @@ async function deleteDeck(req, res) {
     cards.forEach((card) => {
       // Handle Image
       if (card.image) {
-        const key = decodeURIComponent(card.image.split("/").pop());
+        const key = decodeURIComponent(
+          card.image.split("/").pop().split("?")[0]
+        );
         objectsToDelete.push({ Key: key });
       }
       // Handle Sound
       if (card.sound) {
-        const key = decodeURIComponent(card.sound.split("/").pop());
+        const key = decodeURIComponent(
+          card.sound.split("/").pop().split("?")[0]
+        );
         objectsToDelete.push({ Key: key });
       }
     });

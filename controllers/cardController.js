@@ -104,45 +104,43 @@ async function deleteCard(req, res) {
       return res.status(404).json({ message: "Card not found" });
     }
 
-    // Helper function to extract key from URL and delete from S3
+    // Helper to delete from S3
     const deleteFromS3 = async (fileUrl) => {
       if (!fileUrl) return;
 
       try {
-        // Split the URL to get the filename
-        const rawFilename = fileUrl.split("/").pop();
+        // 1. Split by '/' to get the filename part
+        // 2. Split by '?' to remove any query parameters (just in case)
+        const rawFilename = fileUrl.split("/").pop().split("?")[0];
 
-        // DECODE the filename
-        const fileKey = decodeURIComponent(rawFilename);
+        // 3. Decode URI component (turns %20 back into spaces)
+        const key = decodeURIComponent(rawFilename);
 
-        console.log(`Attempting to delete Key: ${fileKey}`); // Debug log
+        console.log(
+          `[Delete] Attempting to delete Key: ${key} from Bucket: ${process.env.S3_BUCKET_NAME}`
+        );
 
         await s3.send(
           new DeleteObjectCommand({
             Bucket: process.env.S3_BUCKET_NAME,
-            Key: fileKey,
+            Key: key,
           })
         );
-        console.log(`Deleted S3 object: ${fileKey}`);
-      } catch (s3Err) {
-        console.error(`Failed to delete S3 object`, s3Err);
+
+        console.log(`[Delete] Successfully sent delete command for: ${key}`);
+      } catch (err) {
+        console.error(`[Delete] S3 Error for URL ${fileUrl}:`, err);
       }
     };
 
-    // Delete image from S3 if it exists
-    if (card.image) {
-      await deleteFromS3(card.image);
-    }
-
-    // Delete sound from S3 if it exists
-    if (card.sound) {
-      await deleteFromS3(card.sound);
-    }
+    // Delete associated files
+    await deleteFromS3(card.image);
+    await deleteFromS3(card.sound);
 
     // Delete the card from DB
     await Card.findByIdAndDelete(cardID);
 
-    res.json({ message: "Card and associated files deleted successfully" });
+    res.json({ message: "Card deleted successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to delete card" });
