@@ -1,31 +1,42 @@
-// SM-2 review algorithm
 function sm2(card, quality) {
   let { repetition, interval, easeFactor } = card;
 
-  // 1 = Hard, 2 = Good, 3 = Easy
+  // quality: 0=Again, 1=Hard, 2=Good, 3=Easy
 
-  if (repetition === 0) {
+  if (quality === 0) {
+    // If called, reset reps.
+    repetition = 0;
     interval = 1;
-  } else if (repetition === 1) {
-    interval = 6;
   } else {
-    interval = Math.round(interval * easeFactor);
+    // Passing grades (1, 2, 3)
+    if (repetition === 0) {
+      interval = 1;
+    } else if (repetition === 1) {
+      interval = 6;
+    } else {
+      // Repetition >= 2: Apply modifiers based on rating
+      if (quality === 1) {
+        // Hard: 1.2x multiplier (minimum increase)
+        interval = Math.round(interval * 1.2);
+      } else if (quality === 2) {
+        // Good: Standard EF multiplier
+        interval = Math.round(interval * easeFactor);
+      } else if (quality === 3) {
+        // Easy: EF multiplier + Bonus (x1.3)
+        interval = Math.round(interval * easeFactor * 1.3);
+      }
+    }
+    repetition += 1;
   }
 
-  repetition += 1;
-
-  // Update EF using standard SM-2 formula
+  // Ease Factor
   easeFactor =
     easeFactor + (0.1 - (3 - quality) * (0.08 + (3 - quality) * 0.02));
 
-  // Minimum EF = 1.3
+  // Minimum EF limit
   if (easeFactor < 1.3) easeFactor = 1.3;
 
-  // Set next review date
-  const nextReview = new Date();
-  nextReview.setDate(nextReview.getDate() + interval);
-
-  return { repetition, interval, easeFactor, nextReview };
+  return { repetition, interval, easeFactor };
 }
 
 module.exports = sm2;

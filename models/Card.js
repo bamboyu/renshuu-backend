@@ -20,7 +20,7 @@ const CardSchema = new mongoose.Schema({
 
   // Learning / New card fields
   learningStep: { type: Number, default: 0 }, // index in learningSteps array
-  learningSteps: { type: [Number], default: [1, 10] }, // minutes, e.g., 1m, 10m
+  learningSteps: { type: [Number], default: [1, 5, 10] }, // in minutes
 
   // Lapses for review cards
   lapses: { type: Number, default: 0 },
