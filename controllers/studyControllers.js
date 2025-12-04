@@ -25,6 +25,15 @@ const formatTime = (time, unit) => {
   return Math.round(time) + "d";
 };
 
+// Helper to graduate a card
+function graduateCard(card) {
+  card.tag = "Young";
+  card.repetition = 1;
+  card.interval = 1;
+  card.easeFactor = 2.5;
+  card.nextReview = setNextReview(card.interval, "days");
+}
+
 // Get estimated next review times for all ratings
 const getEstimates = (card) => {
   const estimates = {};
@@ -64,23 +73,30 @@ const getEstimates = (card) => {
           result = formatTime(newInterval, "days");
         }
       } else {
-        // New Learning Logic
+        // New Card Learning Logic
         if (rating === 0) {
-          // Again
+          // Again -> First step
           const stepTime = tempCard.learningSteps[0];
           result = formatTime(stepTime, "minutes");
-        } else {
-          // Hard/Good/Easy -> Advance step
+        } else if (rating === 1) {
+          // Hard -> Advance 1 step
           const nextStep = tempCard.learningStep + 1;
-
           if (nextStep >= tempCard.learningSteps.length) {
-            // Graduate -> 1 day
-            result = formatTime(1, "days");
+            result = formatTime(1, "days"); // Graduate
           } else {
-            // Next learning step
-            const stepTime = tempCard.learningSteps[nextStep];
-            result = formatTime(stepTime, "minutes");
+            result = formatTime(tempCard.learningSteps[nextStep], "minutes");
           }
+        } else if (rating === 2) {
+          // Good -> Advance 2 steps (Jump)
+          const nextStep = tempCard.learningStep + 2;
+          if (nextStep >= tempCard.learningSteps.length) {
+            result = formatTime(1, "days"); // Graduate
+          } else {
+            result = formatTime(tempCard.learningSteps[nextStep], "minutes");
+          }
+        } else {
+          // Easy -> Graduate immediately
+          result = formatTime(3, "days");
         }
       }
     } else {
@@ -198,35 +214,50 @@ async function reviewCard(req, res) {
         }
       } else {
         // New Learning Logic
+        if (card.tag === "New") card.tag = "Learning";
+
         if (rating === 0) {
-          // Again -> stay in Learning (or go to Learning if New), reset step
-          card.tag = "Learning";
+          // Again -> Reset step
           card.learningStep = 0;
           card.nextReview = setNextReview(
             card.learningSteps[card.learningStep],
             "minutes"
           );
-        } else {
-          // Passed
-          if (card.tag === "New") card.tag = "Learning";
-
-          // Advance step
+        } else if (rating === 1) {
+          // Hard -> +1 Step
           card.learningStep += 1;
 
           if (card.learningStep >= card.learningSteps.length) {
-            // Graduates to review
-            card.tag = "Young";
-            card.repetition = 1;
-            card.interval = 1; // first interval
-            card.easeFactor = 2.5;
-            card.nextReview = setNextReview(card.interval, "days");
+            // Graduate
+            graduateCard(card);
           } else {
-            // Stay in Learning, next step
+            // Next Step
             card.nextReview = setNextReview(
               card.learningSteps[card.learningStep],
               "minutes"
             );
           }
+        } else if (rating === 2) {
+          // Good -> +2 Steps (Jump)
+          card.learningStep += 2;
+
+          if (card.learningStep >= card.learningSteps.length) {
+            // Graduate
+            graduateCard(card);
+          } else {
+            // Next Step
+            card.nextReview = setNextReview(
+              card.learningSteps[card.learningStep],
+              "minutes"
+            );
+          }
+        } else {
+          // Easy (3) -> Graduate Immediately
+          card.tag = "Young";
+          card.repetition = 1;
+          card.interval = 3;
+          card.easeFactor = 2.5;
+          card.nextReview = setNextReview(card.interval, "days");
         }
       }
     } else {
