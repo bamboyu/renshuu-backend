@@ -43,10 +43,7 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 // Middleware
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://renshuu-cu712u8v0-bamboyus-projects.vercel.app",
-    ],
+    origin: ["http://localhost:5173", "https://renshuu-virid.vercel.app/"],
     credentials: true,
   })
 );
