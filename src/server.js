@@ -5,8 +5,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const path = require("path");
-const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
 
 // Route files
 const authRoutes = require("./routes/authRoutes");
@@ -20,25 +20,13 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Swagger setup
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Flashcard API",
-      version: "1.0.0",
-      description: "API Documentation for Renshuu Flashcards",
-    },
-    servers: [
-      {
-        url: process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`,
-        description: "Server",
-      },
-    ],
+const swaggerDocs = YAML.load(path.join(__dirname, "../swagger.yaml"));
+swaggerDocs.servers = [
+  {
+    url: process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`,
+    description: "Server",
   },
-  apis: ["./swagger.yaml"],
-};
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
+];
 
 // Middleware
 app.use(
