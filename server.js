@@ -8,22 +8,6 @@ const path = require("path");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
-// Swagger setup
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Flashcard API",
-      version: "1.0.0",
-      description: "API Documentation for Renshuu Flashcards",
-    },
-    servers: [{ url: "http://localhost:5000" }],
-  },
-  apis: ["./swagger.yaml"],
-};
-
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
 // Route files
 const authRoutes = require("./routes/authRoutes");
 const deckRoutes = require("./routes/deckRoutes");
@@ -35,12 +19,33 @@ const generateRoutes = require("./routes/generateRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Swagger setup
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Flashcard API",
+      version: "1.0.0",
+      description: "API Documentation for Renshuu Flashcards",
+    },
+    servers: [
+      {
+        url: process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`,
+        description: "Server",
+      },
+    ],
+  },
+  apis: ["./swagger.yaml"],
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
 // Middleware
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "[https://your-frontend-app.vercel.app](https://your-frontend-app.vercel.app)",
+      "https://renshuu-cu712u8v0-bamboyus-projects.vercel.app/",
     ],
     credentials: true,
   })
