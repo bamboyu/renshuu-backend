@@ -2,15 +2,37 @@ const Card = require("../models/Card");
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const s3 = require("../config/aws");
 
+// Helper function to delete a file from S3
+const deleteFromS3 = async (fileUrl) => {
+  if (!fileUrl) return;
+
+  try {
+    // 1. Extract filename from URL
+    // 2. Remove query params if any
+    const rawFilename = fileUrl.split("/").pop().split("?")[0];
+
+    // 3. Decode special chars
+    const key = decodeURIComponent(rawFilename);
+
+    console.log(`[S3 Delete] Removing old file: ${key}`);
+
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.S3_BUCKET_NAME,
+        Key: key,
+      })
+    );
+  } catch (err) {
+    console.error(`[S3 Delete Error] Could not delete ${fileUrl}:`, err);
+  }
+};
+
 // Create a new card
 async function createCard(req, res) {
   const { deckID, front, back, tag } = req.body;
 
   try {
-    // LOGIC FIX:
-    // 1. Check if a file was uploaded via Multer (req.files.image)
-    // 2. If not, check if a URL string was sent in the body (req.body.image)
-    // 3. Otherwise, set to null
+    // Handle optional file uploads
     const image =
       req.files && req.files.image
         ? req.files.image[0].location
@@ -76,14 +98,41 @@ async function updateCard(req, res) {
     const card = await Card.findById(cardID);
     if (!card) return res.status(404).json({ message: "Card not found" });
 
-    // Update fields
+    // Update text fields
     if (front !== undefined) card.front = front;
     if (back !== undefined) card.back = back;
     if (tag !== undefined) card.tag = tag;
 
-    // Update files if new ones are uploaded
-    if (req.files?.image) card.image = req.files.image[0].location;
-    if (req.files?.sound) card.sound = req.files.sound[0].location;
+    // Handle image update
+    if (req.files && req.files.image) {
+      // If there is an existing image, delete it from AWS
+      if (card.image) {
+        await deleteFromS3(card.image);
+      }
+      // Set the new image URL
+      card.image = req.files.image[0].location;
+    } else if (req.body.image && req.body.image !== card.image) {
+      // Handle case where frontend sends a URL string
+      if (card.image) {
+        await deleteFromS3(card.image);
+      }
+      card.image = req.body.image;
+    }
+
+    // Handle sound update
+    if (req.files && req.files.sound) {
+      // If there is an existing sound, delete it from AWS
+      if (card.sound) {
+        await deleteFromS3(card.sound);
+      }
+      // Set the new sound URL
+      card.sound = req.files.sound[0].location;
+    } else if (req.body.sound && req.body.sound !== card.sound) {
+      if (card.sound) {
+        await deleteFromS3(card.sound);
+      }
+      card.sound = req.body.sound;
+    }
 
     await card.save();
 
@@ -104,36 +153,7 @@ async function deleteCard(req, res) {
       return res.status(404).json({ message: "Card not found" });
     }
 
-    // Helper to delete from S3
-    const deleteFromS3 = async (fileUrl) => {
-      if (!fileUrl) return;
-
-      try {
-        // 1. Split by '/' to get the filename part
-        // 2. Split by '?' to remove any query parameters (just in case)
-        const rawFilename = fileUrl.split("/").pop().split("?")[0];
-
-        // 3. Decode URI component (turns %20 back into spaces)
-        const key = decodeURIComponent(rawFilename);
-
-        console.log(
-          `[Delete] Attempting to delete Key: ${key} from Bucket: ${process.env.S3_BUCKET_NAME}`
-        );
-
-        await s3.send(
-          new DeleteObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-          })
-        );
-
-        console.log(`[Delete] Successfully sent delete command for: ${key}`);
-      } catch (err) {
-        console.error(`[Delete] S3 Error for URL ${fileUrl}:`, err);
-      }
-    };
-
-    // Delete associated files
+    // Use helper to delete image and sound from S3
     await deleteFromS3(card.image);
     await deleteFromS3(card.sound);
 

@@ -26,6 +26,7 @@ const CardSchema = new mongoose.Schema({
   lapses: { type: Number, default: 0 },
 });
 
+// Auto timestamps
 CardSchema.set("timestamps", true);
 
 module.exports = mongoose.model("Card", CardSchema);

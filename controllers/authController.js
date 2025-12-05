@@ -1,4 +1,3 @@
-// /controllers/authController.js
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
@@ -65,7 +64,7 @@ async function logout(req, res) {
   res.json({ message: "Logged out successfully" });
 }
 
-// Update Account (New)
+// Update Account
 async function updateAccount(req, res) {
   const userId = req.user.id;
   const { email, currentPassword, newPassword } = req.body;
@@ -107,4 +106,4 @@ async function updateAccount(req, res) {
   }
 }
 
-module.exports = { signup, login, logout };
+module.exports = { signup, login, logout, updateAccount };

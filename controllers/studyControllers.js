@@ -238,7 +238,7 @@ async function reviewCard(req, res) {
             );
           }
         } else if (rating === 2) {
-          // Good -> +2 Steps (Jump)
+          // Good -> +2 Steps
           card.learningStep += 2;
 
           if (card.learningStep >= card.learningSteps.length) {

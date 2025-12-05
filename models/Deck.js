@@ -15,4 +15,5 @@ const DeckSchema = new mongoose.Schema({
 
 // Auto timestamps
 DeckSchema.set("timestamps", true);
+
 module.exports = mongoose.model("Deck", DeckSchema);
