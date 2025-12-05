@@ -15,11 +15,17 @@ components:
     User:
       type: object
       properties:
-        id:
+        _id:
           type: string
         email:
           type: string
           format: email
+        password:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
 
     Deck:
       type: object
@@ -125,7 +131,12 @@ paths:
                   accessToken:
                     type: string
                   user:
-                    $ref: "#/components/schemas/User"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
         400:
           description: Invalid login
         500:
@@ -176,9 +187,16 @@ paths:
                   message:
                     type: string
                   user:
-                    $ref: "#/components/schemas/User"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      email:
+                        type: string
         400:
           description: Incorrect password or email exists
+        401:
+          description: Unauthorized
         404:
           description: User not found
         500:
@@ -208,6 +226,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Deck"
+        400:
+          description: Missing deck name
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
     get:
       summary: Get all decks
@@ -223,6 +247,10 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Deck"
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
   /api/deck/{deckID}:
     put:
@@ -250,6 +278,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Deck"
+        401:
+          description: Unauthorized
+        404:
+          description: Deck not found
+        500:
+          description: Server error
 
     delete:
       summary: Delete deck
@@ -271,6 +305,12 @@ paths:
                 properties:
                   message:
                     type: string
+        401:
+          description: Unauthorized
+        404:
+          description: Deck not found
+        500:
+          description: Server error
 
   # ---------------- CARD ----------------
 
@@ -307,6 +347,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
   /api/card/{deckID}:
     get:
@@ -329,6 +373,10 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Card"
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
   /api/card/single/{cardID}:
     get:
@@ -349,6 +397,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
+        401:
+          description: Unauthorized
+        404:
+          description: Card not found
+        500:
+          description: Server error
 
   /api/card/{cardID}:
     put:
@@ -386,6 +440,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Card"
+        401:
+          description: Unauthorized
+        404:
+          description: Card not found
+        500:
+          description: Server error
 
     delete:
       summary: Delete card
@@ -400,13 +460,19 @@ paths:
             type: string
       responses:
         200:
-          description: Card deleted
+          description: Card deleted successfully
           content:
             application/json:
               schema:
                 properties:
                   message:
                     type: string
+        401:
+          description: Unauthorized
+        404:
+          description: Card not found
+        500:
+          description: Failed to delete card
 
   /api/card/count/{deckID}:
     get:
@@ -431,58 +497,10 @@ paths:
                     type: string
                   count:
                     type: number
-
-  # ---------------- AI ----------------
-
-  /api/generate/back:
-    post:
-      summary: Generate back text
-      tags: [AI]
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required: [front]
-              properties:
-                front:
-                  type: string
-      responses:
-        200:
-          description: Generated back
-          content:
-            application/json:
-              schema:
-                properties:
-                  back:
-                    type: string
-
-  /api/generate/image:
-    post:
-      summary: Generate image
-      tags: [AI]
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required: [front]
-              properties:
-                front:
-                  type: string
-                cardID:
-                  type: string
-      responses:
-        200:
-          description: Image generated
-          content:
-            application/json:
-              schema:
-                properties:
-                  image:
-                    type: string
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
   # ---------------- STUDY ----------------
 
@@ -509,6 +527,10 @@ paths:
                     $ref: "#/components/schemas/Card"
                   estimates:
                     type: object
+        401:
+          description: Unauthorized
+        500:
+          description: Server error
 
   /api/study/review/{cardID}:
     post:
@@ -533,12 +555,84 @@ paths:
                   enum: [0, 1, 2, 3]
       responses:
         200:
-          description: Review saved
+          description: Review updated
           content:
             application/json:
               schema:
+                type: object
                 properties:
                   message:
                     type: string
                   card:
                     $ref: "#/components/schemas/Card"
+        400:
+          description: Rating is required
+        401:
+          description: Unauthorized
+        404:
+          description: Card not found
+        500:
+          description: Server error
+
+  # ---------------- AI GENERATION ----------------
+
+  /api/generate/back:
+    post:
+      summary: Generate back text
+      tags: [AI]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required: [front]
+              properties:
+                front:
+                  type: string
+      responses:
+        200:
+          description: Generated back
+          content:
+            application/json:
+              schema:
+                properties:
+                  back:
+                    type: string
+        400:
+          description: Missing front text
+        401:
+          description: Unauthorized
+        500:
+          description: Failed to generate back text
+  /api/generate/image:
+    post:
+      summary: Generate image
+      tags: [AI]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required: [front]
+              properties:
+                front:
+                  type: string
+                cardID:
+                  type: string
+      responses:
+        200:
+          description: Image generated
+          content:
+            application/json:
+              schema:
+                properties:
+                  image:
+                    type: string
+        400:
+          description: Missing front text
+        401:
+          description: Unauthorized
+        500:
+          description: Failed to generate image

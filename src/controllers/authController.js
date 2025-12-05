@@ -48,10 +48,7 @@ async function login(req, res) {
     res.json({
       message: "Login successful",
       accessToken,
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+      user: { id: user._id, email: user.email },
     });
   } catch (err) {
     console.error(err);

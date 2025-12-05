@@ -35,10 +35,14 @@ async function generateImage(req, res) {
   // Extract cardID if it exists (for updating existing cards)
   const { front, cardID } = req.body;
 
+  if (!front) {
+    return res.status(400).json({ message: "Missing front text" });
+  }
+
   try {
     // 1. Generate image with Base64 response
     const imageResponse = await openai.images.generate({
-      model: "dall-e-3", // Use a valid model (dall-e-2 or dall-e-3)
+      model: "dall-e-3", // Use a valid model
       prompt: `Create a simple illustrative image for: "${front}"`,
       size: "1024x1024",
       response_format: "b64_json", // REQUIRED: Get image data, not just a URL
@@ -67,7 +71,7 @@ async function generateImage(req, res) {
     // 6. Construct public URL
     const s3Url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-    // 7. [FIX] Save to Database if cardID is provided
+    // 7. Save to Database if cardID is provided
     if (cardID) {
       const updatedCard = await Card.findByIdAndUpdate(
         cardID,
