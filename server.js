@@ -45,7 +45,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://renshuu-cu712u8v0-bamboyus-projects.vercel.app/",
+      "https://renshuu-cu712u8v0-bamboyus-projects.vercel.app",
     ],
     credentials: true,
   })
