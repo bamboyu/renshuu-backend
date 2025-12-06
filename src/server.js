@@ -31,7 +31,7 @@ swaggerDocs.servers = [
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5174", "https://renshuu-virid.vercel.app"],
+    origin: ["http://localhost:5173", "https://renshuu-virid.vercel.app"],
     credentials: true,
   })
 );

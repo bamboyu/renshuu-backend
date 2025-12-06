@@ -2,7 +2,7 @@ const Card = require("../models/Card");
 const sm2 = require("../services/sm2");
 
 // Default review time (all cards due same time)
-const DEFAULT_REVIEW_HOUR = 20; // 8 PM
+const DEFAULT_REVIEW_HOUR = 24; // Midnight
 const DEFAULT_REVIEW_MINUTE = 0;
 
 // Helper to set nextReview to the same time
