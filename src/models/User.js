@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  // For password reset
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
 });
 
 // Auto timestamps

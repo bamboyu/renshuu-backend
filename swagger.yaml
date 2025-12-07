@@ -202,6 +202,73 @@ paths:
         500:
           description: Server error
 
+  /api/auth/forgot-password:
+    post:
+      summary: Request password reset link
+      description: Sends an email with a reset link if the user exists.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        200:
+          description: Email sent (or simulated success for security)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Server error
+
+  /api/auth/reset-password/{token}:
+    post:
+      summary: Reset password
+      description: Resets the user's password using a valid token from the email link.
+      tags: [Auth]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          description: The reset token received via email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newPassword]
+              properties:
+                newPassword:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        400:
+          description: Invalid or expired token
+        500:
+          description: Server error
+
   # ---------------- DECK ----------------
 
   /api/deck:
