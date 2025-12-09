@@ -55,7 +55,7 @@ The backend server for **Renshuu**, an AI-powered spaced repetition flashcard ap
    \# Email Service (Password Reset)  
    EMAIL\_USER=your-email@gmail.com  
    EMAIL\_PASS=your\_app\_password  
-   CLIENT\_URL=\[https://renshuu-virid.vercel.app\](https://renshuu-virid.vercel.app)
+   CLIENT\_URL=https://renshuu-virid.vercel.app/
 
 4. **Run the server:**  
    \# Development mode  
