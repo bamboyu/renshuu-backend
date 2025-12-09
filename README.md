@@ -26,8 +26,7 @@ The backend server for **Renshuu**, an AI-powered spaced repetition flashcard ap
 ### **Installation**
 
 1. **Clone the repository:**  
-   git clone \[https://github.com/yourusername/renshuu-backend.git\](https://github.com/yourusername/renshuu-backend.git)  
-   cd renshuu-backend
+   git clone https://github.com/bamboyu/renshuu-backend
 
 2. **Install dependencies:**  
    npm install
