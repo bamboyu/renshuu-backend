@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "@open-spaced-repetition/binding": "^0.3.0",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.13.2",
     "bcrypt": "^5.1.0",
