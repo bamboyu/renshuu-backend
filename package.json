@@ -26,6 +26,7 @@
     "openai": "^6.9.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "ts-fsrs": "^5.3.2",
     "uuid": "^13.0.0",
     "yamljs": "^0.3.0"
   },

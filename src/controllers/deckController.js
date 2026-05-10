@@ -54,6 +54,7 @@ async function updateDeck(req, res) {
     res.status(500).json({ message: "Server error" });
   }
 }
+
 // Delete a deck and all its cards
 async function deleteDeck(req, res) {
   const { deckID } = req.params;
