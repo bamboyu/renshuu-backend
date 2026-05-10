@@ -1,5 +1,6 @@
 const Deck = require("../models/Deck");
 const Card = require("../models/Card");
+const ReviewLog = require("../models/Reviewlog");
 const { DeleteObjectsCommand } = require("@aws-sdk/client-s3");
 const s3 = require("../config/aws");
 
@@ -107,10 +108,14 @@ async function deleteDeck(req, res) {
       }
     }
 
-    // 5. Delete all cards in the deck from DB
+    // 5. Delete all review logs for cards in this deck
+    const cardIds = cards.map((c) => c._id);
+    await ReviewLog.deleteMany({ cardID: { $in: cardIds } });
+
+    // 6. Delete all cards in the deck from DB
     await Card.deleteMany({ deckID: deckID });
 
-    // 6. Delete the deck from DB
+    // 7. Delete the deck from DB
     await Deck.findByIdAndDelete(deckID);
 
     res.json({
