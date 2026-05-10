@@ -38,18 +38,22 @@ async function getDecks(req, res) {
 // Update deck
 async function updateDeck(req, res) {
   const { deckID } = req.params;
-  const { name } = req.body;
+  const { name, algorithm } = req.body;
 
   try {
-    const deck = await Deck.findByIdAndUpdate(deckID, { name }, { new: true });
+    const deck = await Deck.findById(deckID);
     if (!deck) return res.status(404).json({ message: "Deck not found" });
+
+    if (name !== undefined) deck.name = name;
+    if (algorithm !== undefined) deck.algorithm = algorithm;
+
+    await deck.save();
     res.json(deck);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 }
-
 // Delete a deck and all its cards
 async function deleteDeck(req, res) {
   const { deckID } = req.params;
@@ -71,14 +75,14 @@ async function deleteDeck(req, res) {
       // Handle Image
       if (card.image) {
         const key = decodeURIComponent(
-          card.image.split("/").pop().split("?")[0]
+          card.image.split("/").pop().split("?")[0],
         );
         objectsToDelete.push({ Key: key });
       }
       // Handle Sound
       if (card.sound) {
         const key = decodeURIComponent(
-          card.sound.split("/").pop().split("?")[0]
+          card.sound.split("/").pop().split("?")[0],
         );
         objectsToDelete.push({ Key: key });
       }
@@ -95,7 +99,7 @@ async function deleteDeck(req, res) {
         });
         await s3.send(command);
         console.log(
-          `Successfully deleted ${objectsToDelete.length} files from S3.`
+          `Successfully deleted ${objectsToDelete.length} files from S3.`,
         );
       } catch (s3Err) {
         console.error("Error deleting files from S3:", s3Err);
