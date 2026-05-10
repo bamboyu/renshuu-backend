@@ -14,6 +14,7 @@ const deckRoutes = require("./routes/deckRoutes");
 const cardRoutes = require("./routes/cardRoutes");
 const studyRoutes = require("./routes/studyRoutes");
 const generateRoutes = require("./routes/generateRoutes");
+const optimizerRoutes = require("./routes/optimizerRoutes");
 
 // Initialize app
 const app = express();
@@ -33,7 +34,7 @@ app.use(
   cors({
     origin: ["http://localhost:5173", "https://renshuu-virid.vercel.app"],
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -45,6 +46,7 @@ app.use("/api/deck", deckRoutes);
 app.use("/api/card", cardRoutes);
 app.use("/api/study", studyRoutes);
 app.use("/api/generate", generateRoutes);
+app.use("/api/optimizer", optimizerRoutes);
 
 // Swagger route
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
