@@ -12,4 +12,6 @@ const ReviewLogSchema = new mongoose.Schema({
   review_date: { type: Date, default: Date.now },
 });
 
+ReviewLogSchema.index({ cardID: 1, review_date: 1 });
+
 module.exports = mongoose.model("ReviewLog", ReviewLogSchema);
